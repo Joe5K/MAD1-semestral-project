@@ -3,12 +3,13 @@ from copy import deepcopy
 
 from numpy import random
 
-NUMBER_OF_NODES = 1000
+NUMBER_OF_NODES = 300
 M = 3
 
 
 class BAGraph:
     def __init__(self, m):
+
         self.edges = []
         self.nodes = {}
         self.current_number = self.m = m
@@ -16,6 +17,7 @@ class BAGraph:
         self.matrix = None
         self.floyd = None
         self.average_distances = None
+        self._shortest_path_graph = None
 
     def get_node_weight(self, number):
         if not self.nodes.get(number):
@@ -79,17 +81,26 @@ class BAGraph:
         dist = deepcopy(self.matrix)
 
         for k in range(V):
-            print(k)
+            #print(k)
             for i in range(V):
                 for j in range(V):
                     dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+            dist[k][k]=0
 
         self.floyd = dist
 
-    def BFS(self, src, dest, dist):
+    @property
+    def shortest_path_graph(self):
+        if not self._shortest_path_graph:
+            self._shortest_path_graph = [self.BFS(i) for i in range(NUMBER_OF_NODES)]
+        return self._shortest_path_graph
+
+
+    def BFS(self, src):
         queue = []
         visited = [False for i in range(NUMBER_OF_NODES)]
         pred = [-1 for i in range(NUMBER_OF_NODES)]
+        dist = [1000000 for i in range(NUMBER_OF_NODES)]
 
         visited[src] = True
         dist[src] = 0
@@ -111,29 +122,10 @@ class BAGraph:
 
                     # We stop BFS when we find
                     # destination.
-                    if (adj[u][i] == dest):
-                        return True
-
-        return False
+        return dist
 
     # utility function to print the shortest distance
     # between source vertex and destination vertex
-    def printShortestDistance(self, source, dest):
-        # predecessor[i] array stores predecessor of
-        # i and distance array stores distance of i
-        # from s
-        dist = [1000000 for i in range(NUMBER_OF_NODES)]
-        self.BFS(source, dest, dist)
-        return dist[dest]
-
-        # distance from source is in distance array
-        # print(f"Shortest path between {source} and {dest} is : " + str(dist[dest]), end='')
-
-        # printing path from source to destination
-        # print("\nPath is : : ")
-
-        # for i in range(len(path) - 1, -1, -1):
-        #    print(path[i], end=' ')
 
 
 graph = BAGraph(M)
@@ -143,9 +135,6 @@ for i in range(NUMBER_OF_NODES - M - 1):
     graph.add_node()
 
 
-a = []
-for i in range(NUMBER_OF_NODES):
-    aa = []
-    for j in range(NUMBER_OF_NODES):
-        aa.append(graph.printShortestDistance(i, j))
-    print(i)
+graph.to_floyd()
+b = graph.floyd
+print(graph.shortest_path_graph==b)
