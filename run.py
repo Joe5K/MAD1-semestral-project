@@ -3,16 +3,8 @@ from copy import deepcopy
 
 from numpy import random
 
-NUMBER_OF_NODES = 300
-M = 2
-
-class Node:
-    def __init__(self, number):
-        self.weight = 0
-        self.number = number
-
-    def __str__(self):
-        return f"Number {self.number}, weight {self.weight}"
+NUMBER_OF_NODES = 1000
+M = 3
 
 
 class BAGraph:
@@ -20,20 +12,24 @@ class BAGraph:
         self.edges = []
         self.nodes = {}
         self.current_number = self.m = m
+        self.nodes_dict = {}
         self.matrix = None
         self.floyd = None
+        self.average_distances = None
 
-    def get_node(self, number):
+    def get_node_weight(self, number):
         if not self.nodes.get(number):
-            self.nodes[number] = Node(number)
+            self.nodes[number] = number
         return self.nodes[number]
 
     def generate_initial_graph(self):
         for i in range(self.m, 0, -1):
             for j in range(i):
-                self.edges.append((self.get_node(i), self.get_node(j)))
-                self.get_node(i).weight += 1
-                self.get_node(j).weight += 1
+                self.edges.append((i, j))
+                self.nodes[i] = self.nodes.get(i, 0) + 1
+                self.nodes[i] = self.nodes.get(j, 0) + 1
+                self.nodes_dict[i] = [*self.nodes_dict.get(i, []), *[j]]
+                self.nodes_dict[j] = [*self.nodes_dict.get(j, []), *[i]]
 
     def check_duplicates(self):
         for i in self.edges:
@@ -44,29 +40,31 @@ class BAGraph:
     def get_nodes_to_connect(self):
         numbers = []
         weights = []
-        for i in self.nodes.values():
-            numbers.append(i.number)
-            weights.append(i.weight)
+        for i, j in self.nodes.items():
+            numbers.append(i)
+            weights.append(j)
         delitel = sum(weights)
-        weights = [i/delitel for i in weights]
+        weights = [i / delitel for i in weights]
         return random.choice(numbers, size=self.m, replace=False, p=weights)
 
     def add_node(self):
         self.current_number += 1
-        new_node = self.get_node(self.current_number)
-        for i in self.get_nodes_to_connect():
-            self.edges.append((new_node, self.get_node(i)))
-            self.get_node(i).weight += 1
-        new_node.weight = self.m
+        nodes_to_connect = self.get_nodes_to_connect()
+        for i in nodes_to_connect:
+            self.edges.append((self.current_number, i))
+            self.nodes[i] += 1
+            self.nodes_dict[i].append(self.current_number)
+        self.nodes[self.current_number] = self.m
+        self.nodes_dict[self.current_number] = list(nodes_to_connect)
 
     def to_csv(self):
         with open(f"n={NUMBER_OF_NODES}_m={M}.csv", "w") as ass:
-            ass.write("\n".join([*["Source;Target"], *[f"{i[0].number};{i[1].number}" for i in self.edges]])+"\n")
+            ass.write("\n".join([*["Source;Target"], *[f"{i[0].number};{i[1].number}" for i in self.edges]]) + "\n")
 
     def to_matrix(self):
         data = []
         for (i, j) in self.edges:
-            data.append((i.number, j.number))
+            data.append((i, j))
         matrix = [[math.inf for _ in range(NUMBER_OF_NODES)] for __ in range(NUMBER_OF_NODES)]
 
         for (i, j) in data:
@@ -88,12 +86,66 @@ class BAGraph:
 
         self.floyd = dist
 
+    def BFS(self, src, dest, dist):
+        queue = []
+        visited = [False for i in range(NUMBER_OF_NODES)]
+        pred = [-1 for i in range(NUMBER_OF_NODES)]
+
+        visited[src] = True
+        dist[src] = 0
+        queue.append(src)
+
+        adj = self.nodes_dict
+
+        # standard BFS algorithm
+        while (len(queue) != 0):
+            u = queue[0]
+            queue.pop(0)
+            for i in range(len(adj[u])):
+
+                if (visited[adj[u][i]] == False):
+                    visited[adj[u][i]] = True
+                    dist[adj[u][i]] = dist[u] + 1
+                    pred[adj[u][i]] = u
+                    queue.append(adj[u][i])
+
+                    # We stop BFS when we find
+                    # destination.
+                    if (adj[u][i] == dest):
+                        return True
+
+        return False
+
+    # utility function to print the shortest distance
+    # between source vertex and destination vertex
+    def printShortestDistance(self, source, dest):
+        # predecessor[i] array stores predecessor of
+        # i and distance array stores distance of i
+        # from s
+        dist = [1000000 for i in range(NUMBER_OF_NODES)]
+        self.BFS(source, dest, dist)
+        return dist[dest]
+
+        # distance from source is in distance array
+        # print(f"Shortest path between {source} and {dest} is : " + str(dist[dest]), end='')
+
+        # printing path from source to destination
+        # print("\nPath is : : ")
+
+        # for i in range(len(path) - 1, -1, -1):
+        #    print(path[i], end=' ')
+
+
 graph = BAGraph(M)
 graph.generate_initial_graph()
 
-for i in range(NUMBER_OF_NODES-M-1):
+for i in range(NUMBER_OF_NODES - M - 1):
     graph.add_node()
 
 
-graph.to_floyd()
-pass
+a = []
+for i in range(NUMBER_OF_NODES):
+    aa = []
+    for j in range(NUMBER_OF_NODES):
+        aa.append(graph.printShortestDistance(i, j))
+    print(i)
