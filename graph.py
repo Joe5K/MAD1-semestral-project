@@ -57,6 +57,13 @@ class Graph:
         return [sum(i)/(len(i)-1) for i in self.shortest_path_matrix]
 
     @property
+    def shortest_path_matrix_str(self):
+        out = []
+        for i in self.shortest_path_matrix:
+            out.append(str(i))
+        return "\n".join(out)
+
+    @property
     def shortest_path_matrix(self):
         if not self.__shortest_path_matrix:
             self.__shortest_path_matrix = [self._bfs(i) for i in range(len(self.nodes_adjs))]

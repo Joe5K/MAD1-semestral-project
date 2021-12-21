@@ -26,6 +26,6 @@ Data:
 
 -------------------------------------------------------------------------------------
 The shortest path matrix is:
-{loaded_graph.shortest_path_matrix} 
+{loaded_graph.shortest_path_matrix_str} 
 
     """)
