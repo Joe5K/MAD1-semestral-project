@@ -1,3 +1,5 @@
+import subprocess, os, platform
+
 from enum import Enum
 
 from graph import BAGraph, Graph
@@ -5,7 +7,6 @@ from tkinter import *
 
 
 def open_file(filepath):
-    import subprocess, os, platform
     if platform.system() == 'Darwin':  # macOS
         subprocess.call(('open', filepath))
     elif platform.system() == 'Windows':  # Windows

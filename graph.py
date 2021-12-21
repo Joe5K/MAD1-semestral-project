@@ -115,7 +115,8 @@ Data:
 
 -------------------------------------------------------------------------------------
 The shortest path matrix is:
-{self.shortest_path_matrix_str}""")
+{self.shortest_path_matrix_str}
+""")
 
 
 class BAGraph(Graph):
