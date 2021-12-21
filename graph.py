@@ -18,7 +18,7 @@ class Graph:
 
     @property
     def degrees_distribution_str(self):
-        return "{"+", ".join([f"{i}: {j}" for (i, j) in sorted(list(self.degrees_distribution.items()), key=lambda x: x[0], reverse=True)])+"}"
+        return "\n".join([f"Degree {i}: {j} nodes" for (i, j) in sorted(list(self.degrees_distribution.items()), key=lambda x: x[0], reverse=True)])
 
     @property
     def degrees_distribution(self):
@@ -34,6 +34,15 @@ class Graph:
     @property
     def average_degree(self):
         return mean(list(self.degrees.values()))
+
+    @property
+    def nodes_data_str(self):
+        degrees = [i[1] for i in sorted(list(self.degrees.items()), key=lambda x: x[0], reverse=False)]
+
+        output_data = []
+        for index, (degree, average_distance, closeness_centrality) in enumerate(zip(degrees, self.average_distances, self.closeness_centrality)):
+            output_data.append(f"{index+1}. node has degree of {degree}, average distance is {round(average_distance, 2)} and closeness centrality is {round(closeness_centrality, 2)}")
+        return "\n".join(output_data)
 
     @property
     def degrees(self):
@@ -54,10 +63,8 @@ class Graph:
         return self.__shortest_path_matrix
 
     def _bfs(self, src):
-        visited = [False] * len(self.nodes_adjs)
         dist = [math.inf] * len(self.nodes_adjs)
 
-        visited[src] = True
         dist[src] = 0
         queue = [src]
 
@@ -65,8 +72,7 @@ class Graph:
             u = queue[0]
             queue.pop(0)
             for i in self.nodes_adjs[u]:
-                if not visited[i]:
-                    visited[i] = True
+                if dist[i] == math.inf:
                     dist[i] = dist[u] + 1
                     queue.append(i)
             if math.inf not in dist:
