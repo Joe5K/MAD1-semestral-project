@@ -58,34 +58,31 @@ class Graph:
 
     @property
     def shortest_path_matrix_str(self):
-        out = []
-        for i in self.shortest_path_matrix:
-            out.append(str(i))
-        return "\n".join(out)
+        return "\n".join([str(i) for i in self.shortest_path_matrix])
 
     @property
     def shortest_path_matrix(self):
         if not self.__shortest_path_matrix:
-            self.__shortest_path_matrix = [self._bfs(i) for i in range(len(self.nodes_adjs))]
+            self.__shortest_path_matrix = [self._bfs(i) for i in list(self.nodes_adjs.keys())]
         return self.__shortest_path_matrix
 
     def _bfs(self, src):
-        dist = [math.inf] * len(self.nodes_adjs)
+        dist = {i: math.inf for i in self.nodes_adjs.keys()}
 
         dist[src] = 0
         queue = [src]
 
-        while len(queue) != 0:
+        while queue:
             u = queue[0]
             queue.pop(0)
             for i in self.nodes_adjs[u]:
                 if dist[i] == math.inf:
                     dist[i] = dist[u] + 1
                     queue.append(i)
-            if math.inf not in dist:
+            if math.inf not in dist.values():
                 break
 
-        return dist
+        return list(dist.values())
 
     def save_csv(self, filename):
         edges = []
@@ -98,11 +95,27 @@ class Graph:
 
     def load_csv(self, filename):
         with open(filename, "r") as ass:
-            for line in ass.readlines()[1:]:
+            for line in ass.readlines():
                 (i, j) = line.replace("\n", "").split(";")
+                if not i.isnumeric() or not j.isnumeric():
+                    continue
                 (i, j) = (int(i), int(j))
                 self.nodes_adjs[i] = [*self.nodes_adjs.get(i, []), *[j]]
                 self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), *[i]]
+
+    def save_graph_analysis(self, filename):
+        with open(filename, "w") as ass:
+            ass.write(
+        f"""Graph has average of {self.average}
+The average degree is {self.average_degree}
+The degree distribution is:
+{self.degrees_distribution_str}
+Data:
+{self.nodes_data_str}
+
+-------------------------------------------------------------------------------------
+The shortest path matrix is:
+{self.shortest_path_matrix_str}""")
 
 
 class BAGraph(Graph):
