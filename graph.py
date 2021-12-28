@@ -6,7 +6,8 @@ from numpy import random, mean
 class Graph:
     def __init__(self):
         self.nodes_adjs = {}
-        self.__shortest_path_matrix = None
+        self._shortest_path_matrix = None
+        self.has_changed = True
 
     @property
     def average(self):
@@ -62,9 +63,10 @@ class Graph:
 
     @property
     def shortest_path_matrix(self):
-        if not self.__shortest_path_matrix:
-            self.__shortest_path_matrix = [self._bfs(i) for i in list(self.nodes_adjs.keys())]
-        return self.__shortest_path_matrix
+        if self.has_changed or not self._shortest_path_matrix:
+            self._shortest_path_matrix = [self._bfs(i) for i in list(self.nodes_adjs.keys())]
+            self.has_changed = False
+        return self._shortest_path_matrix
 
     def _bfs(self, src):
         dist = {i: math.inf for i in self.nodes_adjs.keys()}
@@ -147,3 +149,4 @@ class BAGraph(Graph):
         for i in nodes_to_connect:
             self.nodes_adjs[i].append(self.current_number)
         self.nodes_adjs[self.current_number] = list(nodes_to_connect)
+        self.has_changed = True
