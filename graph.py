@@ -103,11 +103,15 @@ class Graph:
                 if not i.isnumeric() or not j.isnumeric():
                     continue
                 (i, j) = (int(i), int(j))
+                
                 if not self.nodes_adjs.get(i) or j not in self.nodes_adjs.get(i):
                     self.nodes_adjs[i] = [*self.nodes_adjs.get(i, []), j]
+                else:
                     warning = True
+
                 if not self.nodes_adjs.get(j) or i not in self.nodes_adjs.get(j):
                     self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), i]
+                else:
                     warning = True
         if warning:
             print("Loaded CSV contains some duplicates which have been filtered, this may cause inconsistency")
