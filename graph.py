@@ -96,14 +96,21 @@ class Graph:
             ass.write("\n".join([*["Source;Target"], *[f"{i};{j}" for (i, j) in edges]]) + "\n")
 
     def load_csv(self, filename):
+        warning = False
         with open(filename, "r") as ass:
             for line in ass.readlines():
                 (i, j) = line.replace("\n", "").split(";")
                 if not i.isnumeric() or not j.isnumeric():
                     continue
                 (i, j) = (int(i), int(j))
-                self.nodes_adjs[i] = [*self.nodes_adjs.get(i, []), *[j]]
-                self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), *[i]]
+                if not self.nodes_adjs.get(i) or j not in self.nodes_adjs.get(i):
+                    self.nodes_adjs[i] = [*self.nodes_adjs.get(i, []), j]
+                    warning = True
+                if not self.nodes_adjs.get(j) or i not in self.nodes_adjs.get(j):
+                    self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), i]
+                    warning = True
+        if warning:
+            print("Loaded CSV contains some duplicates which have been filtered, this may cause inconsistency")
 
     def save_graph_analysis(self, filename):
         with open(filename, "w") as ass:
