@@ -89,9 +89,9 @@ class Graph:
     def save_csv(self, filename):
         edges = []
         for i, nodes in self.nodes_adjs.items():
-            for j in nodes:
-                if not (j, i) in edges:
-                    edges.append((i, j))
+            for j in [k for k in nodes if k > i]:
+                edges.append((i, j))
+
         with open(filename, "w") as ass:
             ass.write("\n".join([*["Source;Target"], *[f"{i};{j}" for (i, j) in edges]]) + "\n")
 
