@@ -1,6 +1,5 @@
 import math
-
-from numpy import random, mean
+import random
 
 
 class Graph:
@@ -34,7 +33,8 @@ class Graph:
 
     @property
     def average_degree(self):
-        return mean(list(self.degrees.values()))
+        degrees_list = list(self.degrees.values())
+        return sum(degrees_list)/len(degrees_list)
 
     @property
     def nodes_data_str(self):
@@ -145,14 +145,15 @@ class BAGraph(Graph):
                 self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), *[i]]
 
     def get_nodes_to_connect(self):
-        numbers = []
-        weights = []
+        random_pick_list = []
         for i, j in self.nodes_adjs.items():
-            numbers.append(i)
-            weights.append(len(j))
-        factor = sum(weights)
-        weights = [i / factor for i in weights]
-        return random.choice(numbers, size=self.m, replace=False, p=weights)
+            random_pick_list.extend([i for _ in range(len(j))])
+        nodes_to_connect = []
+        while len(nodes_to_connect) != self.m:
+            picked_node = random.choice(random_pick_list)
+            if picked_node not in nodes_to_connect:
+                nodes_to_connect.append(picked_node)
+        return nodes_to_connect
 
     def add_node(self):
         self.current_number += 1
