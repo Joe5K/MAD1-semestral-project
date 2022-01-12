@@ -1,5 +1,4 @@
-import math
-import random
+from random import randint
 
 
 class Graph:
@@ -69,7 +68,8 @@ class Graph:
         return self._shortest_path_matrix
 
     def _bfs(self, src):
-        dist = {i: math.inf for i in self.nodes_adjs.keys()}
+        inf = float("inf")
+        dist = {i: inf for i in self.nodes_adjs.keys()}
 
         dist[src] = 0
         queue = [src]
@@ -78,10 +78,10 @@ class Graph:
             u = queue[0]
             queue.pop(0)
             for i in self.nodes_adjs[u]:
-                if dist[i] == math.inf:
+                if dist[i] == inf:
                     dist[i] = dist[u] + 1
                     queue.append(i)
-            if math.inf not in dist.values():
+            if inf not in dist.values():
                 break
 
         return list(dist.values())
@@ -150,7 +150,7 @@ class BAGraph(Graph):
             random_pick_list.extend([i for _ in range(len(j))])
         nodes_to_connect = []
         while len(nodes_to_connect) != self.m:
-            picked_node = random.choice(random_pick_list)
+            picked_node = random_pick_list[randint(0, len(random_pick_list)-1)]
             if picked_node not in nodes_to_connect:
                 nodes_to_connect.append(picked_node)
         return nodes_to_connect
