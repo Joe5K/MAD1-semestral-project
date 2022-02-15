@@ -137,20 +137,22 @@ class BAGraph(Graph):
         super().__init__()
         self.current_number = self.m = m
         self.number_of_nodes = number_of_nodes
+        self.random_pick_list = []
 
     def generate_initial_subgraph(self):
         for i in range(self.m, 0, -1):
             for j in range(i):
                 self.nodes_adjs[i] = [*self.nodes_adjs.get(i, []), *[j]]
                 self.nodes_adjs[j] = [*self.nodes_adjs.get(j, []), *[i]]
+                self.random_pick_list.extend((i, j))
 
     def get_nodes_to_connect(self):
-        random_pick_list = []
+        '''random_pick_list = []  # ak by bol bug v pridavani do self.random_pick_listov, tu sa generuje vzdy nanovo
         for i, j in self.nodes_adjs.items():
-            random_pick_list.extend([i for _ in range(len(j))])
+            random_pick_list.extend([i for _ in range(len(j))])'''
         nodes_to_connect = []
         while len(nodes_to_connect) != self.m:
-            picked_node = random_pick_list[randint(0, len(random_pick_list)-1)]
+            picked_node = self.random_pick_list[randint(0, len(self.random_pick_list)-1)]
             if picked_node not in nodes_to_connect:
                 nodes_to_connect.append(picked_node)
         return nodes_to_connect
@@ -159,6 +161,7 @@ class BAGraph(Graph):
         self.current_number += 1
         nodes_to_connect = self.get_nodes_to_connect()
         for i in nodes_to_connect:
+            self.random_pick_list.extend((i, self.current_number))
             self.nodes_adjs[i].append(self.current_number)
         self.nodes_adjs[self.current_number] = list(nodes_to_connect)
         self.has_changed = True
